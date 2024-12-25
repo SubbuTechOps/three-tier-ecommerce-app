@@ -1,0 +1,27 @@
+# Stage 1: Install dependencies
+FROM python:3.9-slim as dependencies
+
+# Set working directory
+WORKDIR /app
+
+# Copy only requirements to install dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Stage 2: Copy source code and run the application
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy installed dependencies from the previous stage
+COPY --from=dependencies /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+
+# Copy the application source code
+COPY . .
+
+# Expose the application port
+EXPOSE 5000
+
+# Run the Flask application
+CMD ["python", "app.py"]
