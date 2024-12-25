@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopEasy - Cart</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <h1 class="logo">ShopEasy</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="catalog.html">Catalog</a>
+                <a href="cart.html">Cart</a>
+                <a href="login.html">Login</a>
+                <a href="signup.html">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="cart-section">
+            <h2 class="cart-title">Your Cart</h2>
+            <div class="cart-grid" id="cartItems"></div>
+            <div id="cartTotalContainer" style="text-align: center; font-size: 1.2em; margin-top: 1em;">
+                <p id="cartTotal" class="cart-total"></p>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2024 ShopEasy. All rights reserved.</p>
+    </footer>
+    <script>
+        async function loadCart() {
+            try {
+                const response = await fetch('/api/cart?user_id=1'); // Replace with dynamic user ID
+                if (!response.ok) {
+                    throw new Error('Failed to fetch cart data');
+                }
+                const data = await response.json();
+
+                const cartItemsDiv = document.getElementById("cartItems");
+                const cartTotalDiv = document.getElementById("cartTotal");
+
+                if (data.cart_items && data.cart_items.length > 0) {
+                    let total = 0;
+                    cartItemsDiv.innerHTML = ''; // Clear existing items
+                    data.cart_items.forEach(item => {
+                        total += item.total_price;
+                        cartItemsDiv.innerHTML += `
+                            <div class="cart-card">
+                                <h3>${item.name}</h3>
+                                <p><strong>Price:</strong> $${item.price.toFixed(2)}</p>
+                                <p><strong>Quantity:</strong> ${item.quantity}</p>
+                                <p><strong>Total:</strong> $${item.total_price.toFixed(2)}</p>
+                                <button onclick="removeFromCart(${item.product_id})" class="remove-btn">Remove</button>
+                            </div>
+                        `;
+                    });
+                    cartTotalDiv.innerHTML = `Cart Total: <strong>$${total.toFixed(2)}</strong>`;
+                } else {
+                    cartItemsDiv.innerHTML = "<p class='empty-cart'>Your cart is empty.</p>";
+                    cartTotalDiv.innerText = '';
+                }
+            } catch (error) {
+                console.error("Error loading cart:", error);
+                document.getElementById("cartItems").innerHTML = "<p class='error-message'>Failed to load cart. Please try again later.</p>";
+            }
+        }
+
+        async function removeFromCart(productId) {
+            try {
+                const response = await fetch('/api/cart', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: 1, product_id: productId }), // Replace user_id dynamically
+                });
+                if (response.ok) {
+                    alert("Product removed from cart!");
+                    loadCart(); // Reload cart after removal
+                } else {
+                    alert("Failed to remove product from cart.");
+                }
+            } catch (error) {
+                console.error("Error removing product from cart:", error);
+                alert("An error occurred. Please try again.");
+            }
+        }
+
+        // Load the cart when the page loads
+        document.addEventListener('DOMContentLoaded', loadCart);
+    </script>
+</body>
+</html>

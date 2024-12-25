@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopEasy - Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <h1 class="logo">ShopEasy</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="catalog.html">Catalog</a>
+                <a href="cart.html">Cart</a>
+                <a href="login.html">Login</a>
+                <a href="signup.html">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="login-section">
+            <div class="login-container">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <p id="message"></p>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 ShopEasy. All rights reserved.</p>
+    </footer>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent form default submission behavior
+
+            // Collect user credentials
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Make the login API request
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+                const message = document.getElementById('message');
+
+                if (response.ok) {
+                    // On successful login, redirect to welcome.html with username
+                    message.style.color = 'green';
+                    message.textContent = result.message;
+                    alert('Login successful! Redirecting to your personalized page...');
+                    window.location.href = `welcome.html?username=${encodeURIComponent(username)}`;
+                } else {
+                    // Handle login failure
+                    message.style.color = 'red';
+                    message.textContent = result.message || 'Login failed. Please try again.';
+                }
+            } catch (error) {
+                // Handle unexpected errors
+                console.error('Error:', error);
+                const message = document.getElementById('message');
+                message.style.color = 'red';
+                message.textContent = 'An error occurred. Please try again.';
+            }
+        });
+    </script>
+</body>
+</html>

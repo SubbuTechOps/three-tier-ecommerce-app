@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopEasy - Catalog</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <h1 class="logo">ShopEasy</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="catalog.html">Catalog</a>
+                <a href="cart.html">Cart</a>
+                <a href="login.html">Login</a>
+                <a href="signup.html">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="featured">
+            <h2>Product Catalog</h2>
+            <div class="product-grid" id="catalogGrid"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 ShopEasy. All rights reserved.</p>
+    </footer>
+    <script>
+            fetch('/api/products')
+            .then(response => response.json())
+            .then(data => {
+                const catalogGrid = document.getElementById("catalogGrid");
+                data.forEach(product => {
+                    const price = parseFloat(product.price); // Convert price to a number
+                    catalogGrid.innerHTML += `
+                        <div class="product-item">
+                            <h3>${product.name}</h3>
+                            <p>Price: $${price.toFixed(2)}</p> <!-- Safely use toFixed -->
+                            <button onclick="addToCart(${product.product_id})">Add to Cart</button>
+                        </div>
+                    `;
+                });
+            })
+            .catch(error => {
+                const catalogGrid = document.getElementById("catalogGrid");
+                catalogGrid.innerHTML = "<p>Failed to load products. Please try again later.</p>";
+                console.error(error);
+            });
+
+        function addToCart(productId) {
+            fetch('/api/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: 1, product_id: productId, quantity: 1 }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Product added to cart!');
+                } else {
+                    alert('Failed to add product to cart.');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+
+    </script>
+</body>
+</html>
